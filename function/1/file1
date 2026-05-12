@@ -1,0 +1,66 @@
+{
+ 	"0": {
+ 		"id": 0,
+ 		"title": "Настроить CI/CD",
+ 		"status": "in_progress",
+ 		"priority": 1,
+ 		"assigned_to": "dev_user",
+ 		"created_at": "2026-05-11T19:28:48.861429552+05:00"
+ 	},
+ 	"1": {
+ 		"id": 1,
+ 		"title": "Исправить баг в API",
+ 		"status": "new",
+ 		"priority": 2,
+ 		"assigned_to": "alice_w",
+ 		"created_at": "2026-05-11T19:28:48.861436144+05:00"
+ 	},
+ 	"2": {
+ 		"id": 2,
+ 		"title": "Обновить документацию",
+ 		"status": "done",
+ 		"priority": 3,
+ 		"assigned_to": "j_smith",
+ 		"created_at": "2026-05-11T19:28:48.861436324+05:00"
+ 	},
+ 	"3": {
+ 		"id": 3,
+ 		"title": "Провести код-ревью",
+ 		"status": "new",
+ 		"priority": 1,
+ 		"assigned_to": "admin",
+ 		"created_at": "2026-05-11T19:28:48.861436434+05:00"
+ 	},
+ 	"4": {
+ 		"id": 4,
+ 		"title": "Настроить CI/CD",
+ 		"status": "in_progress",
+ 		"priority": 1,
+ 		"assigned_to": "dev_user",
+ 		"created_at": "2026-05-11T19:33:43.874932491+05:00"
+ 	},
+ 	"5": {
+ 		"id": 5,
+ 		"title": "Исправить баг в API",
+ 		"status": "new",
+ 		"priority": 2,
+ 		"assigned_to": "alice_w",
+ 		"created_at": "2026-05-11T19:33:43.874932812+05:00"
+ 	},
+ 	"6": {
+ 		"id": 6,
+ 		"title": "Обновить документацию",
+ 		"status": "done",
+ 		"priority": 3,
+ 		"assigned_to": "j_smith",
+ 		"created_at": "2026-05-11T19:33:43.874932912+05:00"
+ 	},
+ 	"7": {
+ 		"id": 7,
+ 		"title": "Провести код-ревью",
+ 		"status": "new",
+ 		"priority": 1,
+ 		"assigned_to": "admin",
+ 		"created_at": "2026-05-11T19:33:43.874933022+05:00"
+ 	}
+ }
