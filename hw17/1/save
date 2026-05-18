@@ -1,0 +1,42 @@
+[
+ 	{
+ 		"id": 1,
+ 		"books": "The Go Programming Language",
+ 		"author": "Alan Donovan",
+ 		"pages": 380,
+ 		"avialable": true,
+ 		"create_at": "2026-05-13T19:19:45.703481552+05:00"
+ 	},
+ 	{
+ 		"id": 2,
+ 		"books": "Clean Code",
+ 		"author": "Cormen",
+ 		"pages": 450,
+ 		"avialable": true,
+ 		"create_at": "2026-05-13T19:19:45.703481712+05:00"
+ 	},
+ 	{
+ 		"id": 3,
+ 		"books": "Design Patterns",
+ 		"author": "GoF",
+ 		"pages": 395,
+ 		"avialable": false,
+ 		"create_at": "2026-05-13T19:19:45.703481832+05:00"
+ 	},
+ 	{
+ 		"id": 4,
+ 		"books": "Refactoring",
+ 		"author": "Martin Fowler",
+ 		"pages": 520,
+ 		"avialable": true,
+ 		"create_at": "2026-05-13T19:19:45.703481963+05:00"
+ 	},
+ 	{
+ 		"id": 5,
+ 		"books": "Introduction to Algorithms",
+ 		"author": "Cormen",
+ 		"pages": 1300,
+ 		"avialable": true,
+ 		"create_at": "2026-05-13T19:19:45.703482083+05:00"
+ 	}
+ ]

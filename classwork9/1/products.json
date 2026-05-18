@@ -1,0 +1,52 @@
+[
+	{
+		"name": "Smartphone",
+		"price": 699.99,
+		"quantity": 15
+	},
+	{
+		"name": "Laptop Pro",
+		"price": 1249.5,
+		"quantity": 7
+	},
+	{
+		"name": "Wireless Earbuds",
+		"price": 89.99,
+		"quantity": 42
+	},
+	{
+		"name": "Mechanical Keyboard",
+		"price": 110,
+		"quantity": 20
+	},
+	{
+		"name": "Gaming Mouse",
+		"price": 45.5,
+		"quantity": 55
+	},
+	{
+		"name": "4K Monitor 27\"",
+		"price": 299.99,
+		"quantity": 10
+	},
+	{
+		"name": "USB-C Hub",
+		"price": 34.95,
+		"quantity": 80
+	},
+	{
+		"name": "External SSD 1TB",
+		"price": 95,
+		"quantity": 24
+	},
+	{
+		"name": "Desk Lamp LED",
+		"price": 25,
+		"quantity": 35
+	},
+	{
+		"name": "HD Webcam",
+		"price": 59.9,
+		"quantity": 18
+	}
+]
