@@ -1,154 +1,55 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
+	"sync"
 	"time"
 )
 
-type Task struct {
-	ID         int       `json:"id"`
-	Title      string    `json:"title"`
-	Status     string    `json:"status"`
-	Priority   int       `json:"priority"`
-	AssignedTo string    `json:"assigned_to"`
-	CreatedAt  time.Time `json:"created_at"`
+func func1() {
+	fmt.Println(1, 2, 3)
 }
 
-func (t Task) Print() {
-	fmt.Printf("id: %d\ntitle: %s\nstatus: %s\npriority: %d\nassigned to: %s\ncreater at: %s\n",
-		t.ID,
-		t.Title,
-		t.Status,
-		t.Priority,
-		t.AssignedTo,
-		t.CreatedAt.Format(time.DateTime),
-	)
+func func2() {
+	fmt.Println(4, 5, 6)
 }
 
-var (
-	dataFile = "function/1/file1"
-)
-
-func Download(fileName string) (map[int]*Task, error) {
-	// открытие файла
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDONLY, 0644)
-	if err != nil {
-		return map[int]*Task{}, err
-	}
-	defer file.Close()
-
-	// выгрузка данных
-	data := make(map[int]*Task)
-	err = json.NewDecoder(file).Decode(&data)
-	if err != nil {
-		return map[int]*Task{}, err
-
-	}
-
-	return data, nil
+func func3() {
+	fmt.Println(7, 8, "9++")
 }
 
-func Save(data map[int]*Task, fileName string) error {
-	// открываем файл
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// задаем параметры форматирования
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent(" ", "	")
-
-	// записываем
-	err = encoder.Encode(data)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func AddTask(t Task, data map[int]*Task) {
-	id := len(data)
-	t.ID = id
-	t.CreatedAt = time.Now()
-	data[id] = &t
-}
-
-func DataPrint(data map[int]*Task) {
-	for _, v := range data {
-		fmt.Println("------------------")
-		v.Print()
+func timer(wg *sync.WaitGroup, t int) {
+	defer wg.Done()
+	fmt.Println("timer start")
+	for i := 0; i < t; i++ {
+		time.Sleep(time.Second)
+		fmt.Println("second", i+1)
 	}
 }
 
-func Stats(data map[int]*Task) ([]Task, *Task, string) {
-    done := make([]Task, 0, len(data))
-	hPriority := new(Task)
-	manyTask := ""
-	us := make(map[string]int)
-    for _, v := range data {
-		if v.Status == "done" {
-			done = append(done, *v)
-		}
-		if hPriority.Priority < v.Priority {
-			hPriority = v
-		}
-		us[v.AssignedTo]++
-		if us[v.AssignedTo] > us[manyTask] {
-			manyTask = v.AssignedTo
-		}
-	}
-	fmt.Println(us)
-
-	return done, hPriority, manyTask
+func goFunc(i int, wg *sync.WaitGroup) {
+	defer wg.Done()
 }
 
 func main() {
-	data, err := Download(dataFile)
-	if err != nil {
-		fmt.Println(err)
-		return
+	go func1()
+	time.Sleep(100 * time.Millisecond)
+	go func2()
+	time.Sleep(100 * time.Millisecond)
+	go func3()
+	time.Sleep(100 * time.Millisecond)
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	timer(&wg, 3)
+	wg.Wait()
+
+	for i := 1; i <= 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			fmt.Println("Goroutine number:", i)
+		}()
 	}
-
-	/*tasks := []Task{
-		{
-			Title:      "Настроить CI/CD",
-			Status:     "in_progress",
-			Priority:   1,
-			AssignedTo: "dev_user",
-		},
-		{
-			Title:      "Исправить баг в API",
-			Status:     "new",
-			Priority:   2,
-			AssignedTo: "alice_w",
-		},
-		{
-			Title:      "Обновить документацию",
-			Status:     "done",
-			Priority:   3,
-			AssignedTo: "admin",
-		},
-		{
-			Title:      "Провести код-ревью",
-			Status:     "new",
-			Priority:   1,
-			AssignedTo: "admin",
-		},
-	}
-	for _, v := range tasks {
-		AddTask(v, data)
-	}*/
-
-	DataPrint(data)
-
-	done, hProirity, manyAssigned := Stats(data)
-    fmt.Printf("all done: %v\nthe highest priority: %v\nemployee with the largest number of tasks: %s\n", done, hProirity, manyAssigned)
-
-    // fmt.Println(Stats(data))
-
-	Save(data, dataFile)
+	wg.Wait()
 }
