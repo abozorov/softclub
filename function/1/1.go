@@ -2,54 +2,27 @@ package main
 
 import (
 	"fmt"
-	"sync"
 	"time"
 )
 
-func func1() {
-	fmt.Println(1, 2, 3)
-}
-
-func func2() {
-	fmt.Println(4, 5, 6)
-}
-
-func func3() {
-	fmt.Println(7, 8, "9++")
-}
-
-func timer(wg *sync.WaitGroup, t int) {
-	defer wg.Done()
-	fmt.Println("timer start")
-	for i := 0; i < t; i++ {
-		time.Sleep(time.Second)
-		fmt.Println("second", i+1)
-	}
-}
-
-func goFunc(i int, wg *sync.WaitGroup) {
-	defer wg.Done()
-}
-
 func main() {
-	go func1()
-	time.Sleep(100 * time.Millisecond)
-	go func2()
-	time.Sleep(100 * time.Millisecond)
-	go func3()
-	time.Sleep(100 * time.Millisecond)
+	ch1 := make(chan string)
+	ch2 := make(chan string)
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	timer(&wg, 3)
-	wg.Wait()
+	go func() {
+		time.Sleep(time.Second)
+		ch1 <- "worker 1 finished"
+	}()
 
-	for i := 1; i <= 10; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			fmt.Println("Goroutine number:", i)
-		}()
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		ch1 <- "worker 2 finished"
+	}()
+
+	select {
+	case msg := <-ch1:
+		fmt.Println(msg)
+	case msg := <-ch2:
+		fmt.Println(msg)
 	}
-	wg.Wait()
 }
