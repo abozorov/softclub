@@ -125,19 +125,15 @@ func problem5() {
 		success <- fmt.Sprintln("Request Success")
 	}()
 
+	STOP:
 	for {
-		ok := false
 		select {
 		case msg := <-errors:
 			fmt.Print(msg)
-			ok = true
+			break STOP
 		case msg := <-success:
 			fmt.Print(msg)
-			ok = true
-		}
-
-		if ok {
-			break
+			break STOP
 		}
 	}
 }
