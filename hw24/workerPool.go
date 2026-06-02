@@ -5,39 +5,41 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 )
 
-func sendRequest(client *http.Client, url string, workers chan<- struct{}) {
-	defer func() {
-		workers <- struct{}{}
-	}()
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println("Ошибка при отправке запроса:", url, err)
-		return
-	}
-	defer resp.Body.Close()
+func worker(client *http.Client, task <-chan string, wg *sync.WaitGroup) {
+	defer wg.Done()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("Ошибка при чтении тела ответа:", url, err)
-		return
+	for url := range task {
+		req, _ := http.NewRequest("GET", url, nil)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Println("Ошибка при отправке запроса:", url, err)
+			continue
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Ошибка при чтении тела ответа:", url, err)
+			continue
+		}
+		fmt.Printf("Url %s\nStatuscode: %d\nBody: %v\n\n",
+			url,
+			resp.StatusCode,
+			// resp.Header,
+			string(body[:50]),
+		)
 	}
-	fmt.Printf("Url %s\nStatuscode: %d\nBody: %v\n\n",
-		url,
-		resp.StatusCode,
-		// resp.Header,
-		string(body[:50]),
-	)
 }
 
 func main() {
 	client := &http.Client{
-		Timeout: time.Second * 5,
+		Timeout: time.Second * 2,
 	}
-	time.Sleep(time.Second*5)
+
 	urls := []string{
 		"https://google.com",
 		"https://api.github.com",
@@ -47,13 +49,16 @@ func main() {
 		"https://httpbin.org/get",
 		"https://pokeapi.co/api/v2/pokemon/pikachu",
 	}
-	workers := make(chan struct{}, 3)
-
-	for _, v := range urls {
-		go sendRequest(client, v, workers)
+	tasks := make(chan string, 3)
+	wg := sync.WaitGroup{}
+	for i := 0; i < 3; i++ {
+		wg.Add(1)
+		go worker(client, tasks, &wg)
 	}
 
-	for ok := true; ok; {
-		_, ok = <-workers
+	for _, url := range urls {
+		tasks <- url
 	}
+	close(tasks)
+	wg.Wait()
 }
