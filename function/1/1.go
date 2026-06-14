@@ -1,72 +1,81 @@
 package main
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
+	"io"
+	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
+	"sync"
+	"time"
 )
 
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Printf("%s %s\n", r.Method, r.URL.Path)
-		next.ServeHTTP(w, r)
-	})
+type req struct {
+	url         string
+	requestType string
 }
 
-func recoverMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		defer func() {
-			if err := recover(); err != nil {
-				http.Error(w, "Internal Server Error",
-					http.StatusInternalServerError)
-				fmt.Println("Panic recovered:", err)
+func worker(client *http.Client, wg *sync.WaitGroup, url, reqType string, clientID int) {
+	defer wg.Done()
+
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			// create request
+			userID := rand.Int() % 100
+			reqBody := bytes.NewBuffer([]byte(fmt.Sprintf("{\"id\":%d,\"name\":\"Bozoorov\"}", userID)))
+			newUrl := url
+			if clientID == 2 {
+				newUrl = url + strconv.Itoa(userID)
 			}
+			req, _ := http.NewRequest(reqType, newUrl, reqBody)
+			req.Header.Add("client_id", strconv.Itoa(clientID))
+			req.Header.Add("Authorization", "secret")
+
+			// Do request
+			resp, err := client.Do(req)
+			if err != nil {
+				log.Println("Ошибка при отправке запроса:", url, err)
+				return
+			}
+			defer resp.Body.Close()
+
+			body, err := io.ReadAll(resp.Body)
+			if err != nil {
+				log.Println("Ошибка при чтении тела ответа:", url, err)
+				return
+			}
+			fmt.Printf("Url %s\nRequest type: %s\nStatuscode: %d\nBody: %v\n\n",
+				newUrl,
+				reqType,
+				resp.StatusCode,
+				// resp.Header,
+				string(body),
+			)
 		}()
-		next.ServeHTTP(w, r)
-	})
-}
-
-type User struct {
-	Name   string `json:"name"`
-	Age    int    `json:"age"`
-	Gender string `json:"gender"`
-}
-
-func createUser(w http.ResponseWriter, r *http.Request) {
-	var userDto User
-	err := json.NewDecoder(r.Body).Decode(&userDto)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Fprintln(w, userDto)
-}
-	
-func users(w http.ResponseWriter, r *http.Request) {
-	userSlices := []User{
-		{Name: "Ali", Age: 10, Gender: "Male"},
-		{Name: "Alisa", Age: 9, Gender: "female"},
-	}
-
-	userSlicesData, err := json.Marshal(userSlices)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("ошибка, json.Marshal: ", err)
-		return
-	}
-
-	_, err = w.Write(userSlicesData)
-	if err != nil {
-		fmt.Println("ошибка, w.Write: ", err)
 	}
 }
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/create/user", createUser)
-	mux.HandleFunc("/users", users)
-	handler := recoverMiddleware(loggingMiddleware(mux))
-	fmt.Println("Сервер запущен на :8080")
-	http.ListenAndServe(":8080", handler)
+	client := &http.Client{
+		Timeout: time.Second * 20,
+	}
+	wg := sync.WaitGroup{}
+
+	urls := []string{
+		"http://localhost:8080/users",
+		"http://localhost:8080/user/",
+		"http://localhost:8080/user",
+	}
+
+	wg.Add(3)
+	go worker(client, &wg, urls[0], "GET", 1)
+	go worker(client, &wg, urls[1], "GET", 2)
+	go worker(client, &wg, urls[2], "POST", 3)
+
+	wg.Wait()
 }
